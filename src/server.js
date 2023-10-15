@@ -15,7 +15,7 @@ app.get('/mission_makers_list', (req, res) => {
 });
 
 app.get('/parsing_status', async (req, res) => {
-  const exists = await fs.pathExists(path.join(rootFolderName, 'temp_results'));
+  const exists = fs.pathExistsSync(path.join(rootFolderName, 'temp_results'));
 
   res.json({
     status: exists ? 'parsing' : 'not_parsing',

@@ -1,7 +1,7 @@
 const Router = require('express');
 const path = require('path');
 
-const { getRotationFolderName } = require('../utils/funcs');
+const { getRotationFolderName, isGameTypeWithRotations } = require('../utils/funcs');
 const { allTimeFolderName, resultsPath } = require('../utils/consts');
 
 const router = new Router();
@@ -10,14 +10,16 @@ const playersGlobalStatisticsFileName = 'global_statistics.json';
 const squadsGlobalStatisticsFileName = 'squad_statistics.json';
 
 router.get('/players/:game_type', (req, res) => {
-  res.sendFile(
-    path.join(
-      resultsPath,
-      req.params.game_type,
-      allTimeFolderName,
-      playersGlobalStatisticsFileName,
-    ),
-  );
+  const filePath = isGameTypeWithRotations(req.params.game_type)
+    ? path.join(
+        resultsPath,
+        req.params.game_type,
+        allTimeFolderName,
+        playersGlobalStatisticsFileName,
+      )
+    : path.join(resultsPath, req.params.game_type, playersGlobalStatisticsFileName);
+
+  res.sendFile(filePath);
 });
 
 router.get('/players/:game_type/rotation/:rotation_number', (req, res) => {
@@ -32,9 +34,16 @@ router.get('/players/:game_type/rotation/:rotation_number', (req, res) => {
 });
 
 router.get('/squads/:game_type', (req, res) => {
-  res.sendFile(
-    path.join(resultsPath, req.params.game_type, allTimeFolderName, squadsGlobalStatisticsFileName),
-  );
+  const filePath = isGameTypeWithRotations(req.params.game_type)
+    ? path.join(
+        resultsPath,
+        req.params.game_type,
+        allTimeFolderName,
+        squadsGlobalStatisticsFileName,
+      )
+    : path.join(resultsPath, req.params.game_type, squadsGlobalStatisticsFileName);
+
+  res.sendFile(filePath);
 });
 
 router.get('/squads/:game_type/rotation/:rotation_number', (req, res) => {
