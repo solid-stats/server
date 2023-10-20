@@ -8,7 +8,7 @@ const { rootFolderName, listsPath, resultsPath } = require('./utils/consts');
 const app = express();
 
 const corsOptions = {
-  origin: 'https://solid-stats.web.app/',
+  origin: 'https://solid-stats.web.app',
 };
 
 app.use(cors(corsOptions));
@@ -42,4 +42,4 @@ app.use('/global_stats', require('./routes/globalStats'));
 
 app.use('/player_stats', require('./routes/playerStats'));
 
-app.listen(7001);
+app.listen(3001);
