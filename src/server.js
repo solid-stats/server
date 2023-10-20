@@ -1,10 +1,17 @@
 const fs = require('fs-extra');
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 
 const { rootFolderName, listsPath, resultsPath } = require('./utils/consts');
 
 const app = express();
+
+const corsOptions = {
+  origin: 'https://solid-stats.web.app/',
+};
+
+app.use(cors(corsOptions));
 
 app.get('/maces_list', (req, res) => {
   res.sendFile(path.join(listsPath, 'mace_list.html'));
