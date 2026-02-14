@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const { rootFolderName, listsPath, resultsPath } = require('./utils/consts');
+const { getStartOfHour } = require('./utils/date');
 
 const app = express();
 
@@ -23,10 +24,11 @@ app.get('/mission_makers_list', (req, res) => {
 
 app.get('/parsing_status', async (req, res) => {
   const exists = fs.pathExistsSync(path.join(rootFolderName, 'temp_results'));
+  const updateDate = fs.statSync(path.join(resultsPath, 'stats.zip')).birthtime;
 
   res.json({
     status: exists ? 'parsing' : 'not_parsing',
-    update_date: fs.statSync(path.join(resultsPath, 'stats.zip')).birthtime,
+    update_date: getStartOfHour(updateDate),
   });
 });
 
