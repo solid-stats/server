@@ -21,7 +21,7 @@ const createTempPaths = () => {
   };
 };
 
-test('getParsingStatusUpdateDate returns replaysListPreparedAt when date is valid', (t) => {
+test('getParsingStatusUpdateDate returns committed updateTime when parsing_status.json is valid', (t) => {
   const { tempRoot, listsPath, resultsPath } = createTempPaths();
 
   t.after(() => {
@@ -29,8 +29,8 @@ test('getParsingStatusUpdateDate returns replaysListPreparedAt when date is vali
   });
 
   fs.writeFileSync(
-    path.join(listsPath, 'replaysList.json'),
-    JSON.stringify({ replaysListPreparedAt: '2026-02-15T12:34:56.000Z' }),
+    path.join(resultsPath, 'parsing_status.json'),
+    JSON.stringify({ updateTime: '2026-02-15T12:34:56.000Z' }),
   );
   fs.writeFileSync(path.join(resultsPath, 'stats.zip'), 'stub');
 
@@ -39,30 +39,7 @@ test('getParsingStatusUpdateDate returns replaysListPreparedAt when date is vali
   assert.equal(result.toISOString(), '2026-02-15T12:34:56.000Z');
 });
 
-test('getParsingStatusUpdateDate falls back to replaysList.json mtime when field is missing', (t) => {
-  const { tempRoot, listsPath, resultsPath } = createTempPaths();
-
-  t.after(() => {
-    fs.removeSync(tempRoot);
-  });
-
-  const replaysListPath = path.join(listsPath, 'replaysList.json');
-  const expectedFallback = new Date('2026-02-15T13:00:00.000Z');
-
-  fs.writeFileSync(
-    replaysListPath,
-    JSON.stringify({ parsedReplays: [], replays: [], problematicReplays: [] }),
-  );
-  fs.utimesSync(replaysListPath, expectedFallback, expectedFallback);
-
-  fs.writeFileSync(path.join(resultsPath, 'stats.zip'), 'stub');
-
-  const result = getParsingStatusUpdateDate(listsPath, resultsPath);
-
-  assert.equal(result.toISOString(), expectedFallback.toISOString());
-});
-
-test('getParsingStatusUpdateDate falls back to stats.zip mtime when replaysList is unreadable', (t) => {
+test('getParsingStatusUpdateDate falls back to stats.zip mtime when parsing_status.json is missing', (t) => {
   const { tempRoot, listsPath, resultsPath } = createTempPaths();
 
   t.after(() => {
@@ -72,7 +49,25 @@ test('getParsingStatusUpdateDate falls back to stats.zip mtime when replaysList 
   const statsZipPath = path.join(resultsPath, 'stats.zip');
   const expectedFallback = new Date('2026-02-15T14:00:00.000Z');
 
-  fs.writeFileSync(path.join(listsPath, 'replaysList.json'), '{');
+  fs.writeFileSync(statsZipPath, 'stub');
+  fs.utimesSync(statsZipPath, expectedFallback, expectedFallback);
+
+  const result = getParsingStatusUpdateDate(listsPath, resultsPath);
+
+  assert.equal(result.toISOString(), expectedFallback.toISOString());
+});
+
+test('getParsingStatusUpdateDate falls back to stats.zip mtime when parsing_status.json is invalid', (t) => {
+  const { tempRoot, listsPath, resultsPath } = createTempPaths();
+
+  t.after(() => {
+    fs.removeSync(tempRoot);
+  });
+
+  const statsZipPath = path.join(resultsPath, 'stats.zip');
+  const expectedFallback = new Date('2026-02-15T14:00:00.000Z');
+
+  fs.writeFileSync(path.join(resultsPath, 'parsing_status.json'), '{');
   fs.writeFileSync(statsZipPath, 'stub');
   fs.utimesSync(statsZipPath, expectedFallback, expectedFallback);
 

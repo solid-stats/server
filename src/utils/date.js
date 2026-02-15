@@ -19,42 +19,26 @@ const getFileModifiedAt = (filePath) => {
   }
 };
 
-const getReplaysListDateInfo = (listsPath) => {
-  const replaysListPath = path.join(listsPath, 'replaysList.json');
+const getCommittedUpdateTime = (resultsPath) => {
+  const parsingStatusPath = path.join(resultsPath, 'parsing_status.json');
 
   try {
-    const replaysListRaw = fs.readFileSync(replaysListPath, 'utf8');
-    const replaysList = JSON.parse(replaysListRaw);
+    const parsingStatusRaw = fs.readFileSync(parsingStatusPath, 'utf8');
+    const parsingStatus = JSON.parse(parsingStatusRaw);
 
-    return {
-      preparedAtDate: getValidDate(replaysList.replaysListPreparedAt),
-      useReplaysListMtimeFallback: true,
-    };
+    return getValidDate(parsingStatus.updateTime);
   } catch {
-    return {
-      preparedAtDate: null,
-      useReplaysListMtimeFallback: false,
-    };
+    return null;
   }
 };
 
-const getParsingStatusUpdateDate = (listsPath, resultsPath) => {
-  const replaysListPath = path.join(listsPath, 'replaysList.json');
+const getParsingStatusUpdateDate = (_listsPath, resultsPath) => {
   const statsZipPath = path.join(resultsPath, 'stats.zip');
 
-  const { preparedAtDate, useReplaysListMtimeFallback } =
-    getReplaysListDateInfo(listsPath);
+  const committedUpdateTime = getCommittedUpdateTime(resultsPath);
 
-  if (preparedAtDate) {
-    return preparedAtDate;
-  }
-
-  if (useReplaysListMtimeFallback) {
-    const replaysListModifiedAt = getFileModifiedAt(replaysListPath);
-
-    if (replaysListModifiedAt) {
-      return replaysListModifiedAt;
-    }
+  if (committedUpdateTime) {
+    return committedUpdateTime;
   }
 
   const statsZipModifiedAt = getFileModifiedAt(statsZipPath);
